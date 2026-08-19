@@ -50,6 +50,7 @@
 | ③ 前缀缓存策略 | Anthropic `cache_control` 断点 / OpenAI `prompt_cache_key`，按模型分档稳定前缀 | 长对话、多轮工具调用 | 命中率按协议正确统计 |
 
 - 三层省的钱互不重叠；命中率在面板实时可查（例：`hitRate=93.9%, cached=65024/69254 tokens`）
+- **前缀连续性分类**：按前缀哈希判定会话缓存连续性（OpenAI 口径 cached 含在 input、Anthropic 口径单独报 cache read，两种量纲统一折算到 0-100%）
 - **Anthropic beta 头合并**：用户的 `context-1m` 与 `prompt-caching` 与 `interleaved-thinking` 令牌并集共存——旧网关直接覆盖导致 400/功能丢失的问题根治
 
 ### 4. 长对话上下文治理
@@ -76,6 +77,8 @@
 
 - **观测台**：告警中心 · 失败模式统计 · 链路回放（路由→重试→换渠道→降级）· 动作审计 · 配置历史/一键回滚
 - **OTEL 导出**：每请求链路 → OTLP 后端（Jaeger / Tempo / Grafana），面板可开
+- **TTFT 首字延迟指标**：按渠道/模型分桶采样首 token 延迟（全局 50 样本 + 分组 20 样本滚动窗口），选路可参考真实体感而非只看均延迟
+- **Agent Status 观测面**：会话/渠道/请求三层滚动投影（各自限额 + 活跃/过期 TTL），多 agent 并发时一屏看全；状态纪律带防投毒（antipoison）、goal 白名单、**不推断 verdict**（只采信 agent 显式声明）
 - Token 用量/成本按渠道/模型统计；配置热生效 + 原子写 + 备份轮转
 - 路由诊断日志实时可 tail（`[熔断降敏] strike=2/3` / `[自愈] 探活成功·恢复会话=0`）
 
@@ -86,6 +89,14 @@
 - **模型解锁**：注入全量约 109 模型目录；状态栏 + 三步 QuickPick 快速切换（`Ctrl/Cmd+Alt+M`）
 
 ---
+
+### 9. Codex 协作增强
+
+- **工作区变更审查**：自动捕获 Codex / Devin / 外部程序对工作区文件的新增/修改/删除，面板集中显示 `A/M/D/?` 状态 + 增删行统计；支持多根工作区、单文件/全部接受、单文件/全部回滚
+- **回滚安全**：回滚前校验磁盘哈希与脏编辑器，发现「Codex 写完又被人工/其他 agent 改过」时拒绝覆盖，绝不误伤新修改
+- **SCM 双视图桥**：同一份前后快照同时注册为 VS Code 原生 SCM 与插件面板差异视图（共享 `filePath+beforeHash+afterHash` 指纹），Accept/Reject 推进同一基线，不产生重复 diff
+- **智能忽略**：Unity `Library/Temp`、依赖/构建目录、二进制、>2MB 文件自动跳过（精确规则不误伤 `Assets/Library`）
+- **热路由配置同步视图**：每 3 秒轻量读取 Codex 实际 `model_provider`/模型/推理强度，面板显示真实值与保存路由是否漂移；只返回非敏感字段
 
 ## 架构
 
