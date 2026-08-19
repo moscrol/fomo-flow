@@ -1,0 +1,44 @@
+# Build artifacts (.vsix) are not tracked; publish installers via GitHub Releases.
+*.vsix
+
+# Rebuild output of _rebuild_catalog.js (byte-identical to _full_model_catalog.json once promoted).
+vendor/bundled-origin/_full_model_catalog_v2.json
+
+# Runtime prompt captures, diagnostics and local state.
+vendor/bundled-origin/_custom_sp.json
+vendor/bundled-origin/_lastinject.json
+vendor/bundled-origin/_lastupstream.json
+vendor/bundled-origin/_injectsbykind.json
+vendor/bundled-origin/_ea_diag.log
+vendor/bundled-origin/_router_diag.log
+vendor/bundled-origin/_model_unlock_enabled
+vendor/bundled-origin/_origin_canon.txt
+vendor/bundled-origin/_origin_mode.txt
+vendor/bundled-origin/source.js.bak*
+vendor/外接api/core/_lsp_parsed_dump.json
+vendor/外接api/core/_upstream_req_dump.json
+vendor/外接api/core/route-decision-inbox.json
+vendor/外接api/core/.dao-request-history.json
+
+# Local Taskboard database and launcher state.
+.taskboard-data/
+
+# Generated top-level release staging output.
+dist/
+
+# Generated design previews are kept local unless explicitly promoted to source assets.
+designs/
+
+# Local design previews and brainstorm runtime state.
+.superpowers/
+
+# Local dependency and editor state.
+node_modules/
+desktop/dist/
+desktop/electron-dist/
+desktop/out/
+desktop/release/
+desktop/.eslintcache
+**/*.bak*
+.DS_Store
+Thumbs.db

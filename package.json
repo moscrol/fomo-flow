@@ -1,0 +1,299 @@
+{
+  "name": "fomo-flow",
+  "displayName": "FOMO FLOW · Model Gateway",
+  "description": "Local model gateway for multi-provider routing, failover, token-cost visibility, OpenAI/Responses/Anthropic/Gemini compatibility, and local reverse-proxy endpoints.",
+  "version": "9.9.424",
+  "publisher": "fomoflow",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moscrol/fomo-flow.git"
+  },
+  "homepage": "https://github.com/moscrol/fomo-flow",
+  "icon": "media/icon.png",
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "fomo-flow",
+    "windsurf",
+    "cascade",
+    "system-prompt",
+    "proxy",
+    "外接api",
+    "third-party",
+    "BYOK",
+    "反代"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "FOMO FLOW runs in all workspaces"
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "fomo-container",
+          "title": "FOMO FLOW",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "fomo-container": [
+        {
+          "id": "fomo.essence",
+          "name": "Overview",
+          "type": "webview"
+        },
+        {
+          "id": "fomo.router",
+          "name": "Model Routing",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "fomo.originInvert",
+        "title": "FOMO FLOW: Enable Guided Mode",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.originPassthrough",
+        "title": "FOMO FLOW: Enable Direct Mode",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.toggleMode",
+        "title": "FOMO FLOW: Switch Mode",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.openPreview",
+        "title": "FOMO FLOW: Open Prompt Preview",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.promptStudio",
+        "title": "FOMO FLOW: Project Prompt Settings",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.verifyEndToEnd",
+        "title": "FOMO FLOW: End-to-End Check",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.selftest",
+        "title": "FOMO FLOW: Self Check",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.外接api.toggle",
+        "title": "FOMO FLOW: External Provider Routing",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.eaConfig",
+        "title": "FOMO FLOW: Provider and Route Settings",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.quickSwitch",
+        "title": "FOMO FLOW: Quick Model Switch",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.agentHud",
+        "title": "FOMO FLOW: Agent HUD",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.restoreOfficial",
+        "title": "FOMO FLOW: Restore Direct Connection",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.term.exec",
+        "title": "FOMO FLOW: Terminal Sessions · Execute",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.term.list",
+        "title": "FOMO FLOW: Terminal Sessions · List",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.term.close",
+        "title": "FOMO FLOW: Terminal Sessions · Close",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.modelUnlock.toggle",
+        "title": "FOMO FLOW: Model Catalog Toggle",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.modelUnlock.status",
+        "title": "FOMO FLOW: Model Catalog Status",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.revproxy.toggle",
+        "title": "FOMO FLOW: Local Model Gateway Toggle",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.revproxy.status",
+        "title": "FOMO FLOW: Local Model Gateway Status",
+        "category": "FOMO FLOW"
+      },
+      {
+        "command": "fomo.codexChanges.open",
+        "title": "FOMO FLOW: Open External Changes",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "fomo.codexChanges.accept",
+        "title": "FOMO FLOW: Accept External Changes",
+        "icon": "$(check)"
+      },
+      {
+        "command": "fomo.codexChanges.reject",
+        "title": "FOMO FLOW: Reject External Changes",
+        "icon": "$(discard)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "fomo.quickSwitch",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m"
+      }
+    ],
+    "menus": {
+      "scm/resourceState/context": [
+        {
+          "command": "fomo.codexChanges.open",
+          "when": "scmProvider == fomoCodexChanges",
+          "group": "inline@1"
+        },
+        {
+          "command": "fomo.codexChanges.accept",
+          "when": "scmProvider == fomoCodexChanges",
+          "group": "inline@2"
+        },
+        {
+          "command": "fomo.codexChanges.reject",
+          "when": "scmProvider == fomoCodexChanges",
+          "group": "inline@3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "FOMO FLOW",
+      "properties": {
+        "fomo.origin.port": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "源.js 反代端口 (0=自动 per-user FNV-1a hash · 8889..8988 · 多账号自然隔离). 非0则覆盖."
+        },
+        "fomo.origin.defaultMode": {
+          "type": "string",
+          "default": "passthrough",
+          "enum": [
+            "invert",
+            "passthrough",
+            "custom"
+          ],
+          "enumDescriptions": [
+            "invert — FOMO FLOW · 注入自定义系统提示词，保留官方工具契约",
+            "passthrough — 官方系统提示词直连",
+            "custom — 使用项目/自定义系统提示词，保留实时信息块"
+          ],
+          "description": "首次激活默认模式"
+        },
+        "fomo.origin.banner": {
+          "type": "boolean",
+          "default": false,
+          "description": "启动时显示 FOMO FLOW 横幅（默认关闭）"
+        },
+        "fomo.外接api.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "第三方 API 路由。开启后按配置.json 将 modelUid 转到已接通渠道。配置目录 ~/.fomo-flow/。"
+        },
+        "fomo.modelUnlock.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "拦截 GetUserSettings 响应并注入完整模型目录，让前端显示全部可用模型。"
+        },
+        "fomo.revproxy.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "把已接通模型暴露为本地 OpenAI / Anthropic 端点。配置在 ~/.fomo-flow/revproxy.json。默认关闭。"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "desktop:dev": "npm --prefix desktop run dev",
+    "desktop:typecheck": "npm --prefix desktop run typecheck",
+    "desktop:build": "npm --prefix desktop run build",
+    "desktop:pack:mac": "npm --prefix desktop run pack:mac",
+    "test:channels": "node test/channel-adapter.test.js && node test/mirasim-openai-gateway.test.js && node test/mirasim-client.test.js && node test/kiro-channel.test.js",
+    "test:codex-hot-route": "node test/codex-hot-route.test.js && node test/codex-hot-endpoint.test.js && node test/codex-change-tracker.test.js && node test/codex-scm-bridge.test.js && node test/codex-tool-surface.test.js",
+    "test": "node vendor/外接api/core/dao-test.js && node test/codex-hot-route.test.js && node test/codex-hot-endpoint.test.js && node test/codex-change-tracker.test.js && node test/codex-scm-bridge.test.js && node test/workspace-tool-strategy.test.js && node test/local-workspace-tools.test.js && node test/acp-workspace-message.test.js && node test/acp-session-lineage.test.js && node test/acp-stdio-proxy.test.js && node test/workspace-ignore-guard.test.js && node test/outbound-redact.test.js && node test/exact-cache.test.js && node test/exact-cache-revproxy.test.js && node test/revproxy-config-cache.test.js && node test/prompt-cache-disabled-strip.test.js && node test/semantic-cache.test.js && node test/semantic-cache-revproxy.test.js && node test/otel-export.test.js && node test/priority-sticky-circuit.test.js && node test/global-options.test.js && node test/pipeline.test.js && node test/acp-agent.test.js && node test/acp-agent-e2e.test.js && node test/acp-upstream.test.js && node test/acp-agent-history.test.js && node test/acp-proxy.test.js && node test/acp-proxy-e2e.test.js && node test/acp-monitor.test.js && node test/acp-augment-stages.test.js && node test/acp-guard.test.js && node test/acp-inject-detect.test.js && node test/adversarial-hardening.test.js && node test/revproxy-cors.test.js && node test/anthropic-relay-auth.test.js && node test/devin-app-cache-hit.test.js && npm run test:channels",
+    "test:quick": "node vendor/外接api/core/dao-test.js --quick",
+    "test:e2e": "node vendor/外接api/core/dao-test.js --e2e",
+    "test:protocol": "node vendor/外接api/core/dao-test.js --protocol",
+    "test:revproxy": "node vendor/外接api/core/_revproxy_selftest.js",
+    "test:protocol-bridge": "node vendor/外接api/core/_protocol_bridge_selftest.js",
+    "test:model-capabilities": "node vendor/外接api/core/_model_capabilities_selftest.js",
+    "test:model-unlock-new": "node test/model-unlock-new-schema.test.js",
+    "test:uninstall-detection": "node test/uninstall-detection.test.js",
+    "test:startup-anchor": "node test/startup-anchor.test.js",
+    "test:startup-latency": "node test/startup-latency.test.js",
+    "test:team-settings-cache": "node test/team-settings-cache.test.js",
+    "test:custom-model": "node vendor/外接api/core/_custom_model_selftest.js",
+    "test:cache-affinity": "node vendor/外接api/core/_cache_affinity_selftest.js",
+    "test:cache-resilience": "node test/cache-resilience.test.js",
+    "test:context-strategy": "node test/context-strategy.test.js",
+    "test:tool-strategy": "node test/tool-strategy.test.js",
+    "test:workspace-strategy": "node test/workspace-tool-strategy.test.js",
+    "test:workspace-ignore": "node test/workspace-ignore-guard.test.js",
+    "test:custom-sp-persistence": "node test/custom-sp-persistence.test.js",
+    "test:webview": "node test/webview-syntax.test.js",
+    "test:revproxy-cors": "node test/revproxy-cors.test.js",
+    "test:outbound-redact": "node test/outbound-redact.test.js",
+    "test:exact-cache": "node test/exact-cache.test.js && node test/exact-cache-revproxy.test.js",
+    "test:semantic-cache": "node test/semantic-cache.test.js && node test/semantic-cache-revproxy.test.js",
+    "test:otel": "node test/otel-export.test.js",
+    "test:acp-agent": "node test/acp-agent.test.js && node test/acp-agent-e2e.test.js && node test/acp-upstream.test.js && node test/acp-agent-history.test.js",
+    "acp:agent": "node scripts/dao-acp-agent.js",
+    "acp:proxy": "node scripts/dao-acp-proxy.js",
+    "test:acp-proxy": "node test/acp-proxy.test.js && node test/acp-proxy-e2e.test.js && node test/acp-monitor.test.js && node test/acp-augment-stages.test.js && node test/acp-guard.test.js && node test/acp-inject-detect.test.js",
+    "test:wintools": "node vendor/外接api/core/_windows_tools_selftest.js",
+    "test:lswedge": "node vendor/外接api/core/_lswedge_selftest.js",
+    "package": "vsce package --no-dependencies --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.84.0",
+    "@vscode/vsce": "^3.9.1"
+  }
+}

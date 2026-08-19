@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>FOMO FLOW HUD</title>
+    <link rel="stylesheet" href="/hud/web-hud.css" />
+    <script src="/hud/web-hud.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell" data-screen-label="FOMO FLOW HUD">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-seal" aria-hidden="true">道</div>
+          <div>
+            <div class="brand-line">
+              <strong>DAO</strong>
+              <span>WEB HUD</span>
+            </div>
+            <p>LOCAL OPERATIONS · READ ONLY</p>
+          </div>
+        </div>
+        <div class="live-block">
+          <div
+            id="connectionState"
+            class="connection is-connecting"
+            aria-live="polite"
+          >
+            <span class="signal-dot" aria-hidden="true"></span>
+            <span class="connection-copy">正在连接</span>
+          </div>
+          <div class="runtime-facts" aria-label="运行信息">
+            <span>MODE <strong id="runtimeMode">—</strong></span>
+            <span>数据源 <strong id="runtimePort">本机 :8955</strong></span>
+            <span>AGE <strong id="refreshAge">—</strong></span>
+            <span>CODEX TOOLS <strong id="codexToolSurface">—</strong></span>
+          </div>
+        </div>
+      </header>
+
+      <section id="kpiStrip" class="kpi-strip" aria-label="关键指标">
+        <article class="kpi-card">
+          <span class="kpi-index">01</span>
+          <span class="kpi-label">活跃会话</span>
+          <strong id="kpiSessions">—</strong>
+          <small id="kpiSessionsNote">等待运行态</small>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-index">02</span>
+          <span class="kpi-label">全局缓存命中</span>
+          <strong id="kpiHitRate">—</strong>
+          <small>近期前缀复用效率</small>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-index">03</span>
+          <span class="kpi-label">缓存读取</span>
+          <strong id="kpiCached">—</strong>
+          <small id="kpiCacheWrite">写入 —</small>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-index">04</span>
+          <span class="kpi-label">告警</span>
+          <strong id="kpiWarnings">—</strong>
+          <small>会话、渠道与运行组件</small>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-index">05</span>
+          <span class="kpi-label">Token</span>
+          <strong id="kpiTokens">—</strong>
+          <small id="kpiCalls">调用 —</small>
+        </article>
+        <article class="kpi-card">
+          <span class="kpi-index">06</span>
+          <span class="kpi-label">熔断</span>
+          <strong id="kpiCircuits">—</strong>
+          <small id="kpiWarmups">Warmup —</small>
+        </article>
+      </section>
+
+      <main class="cockpit-grid">
+        <section class="panel sessions-panel" aria-labelledby="sessionsTitle">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">SESSIONS</span>
+              <h1 id="sessionsTitle">会话状态</h1>
+            </div>
+            <div class="session-controls">
+              <div
+                id="surfaceFilters"
+                class="surface-filters"
+                aria-label="会话来源筛选"
+              >
+                <button
+                  type="button"
+                  data-surface-filter="all"
+                  aria-pressed="true"
+                >
+                  全部
+                </button>
+                <button
+                  type="button"
+                  data-surface-filter="devin"
+                  aria-pressed="false"
+                >
+                  DEVIN
+                </button>
+                <button
+                  type="button"
+                  data-surface-filter="codex"
+                  aria-pressed="false"
+                >
+                  CODEX
+                </button>
+              </div>
+              <span id="sessionCount" class="count-chip">0</span>
+            </div>
+          </div>
+          <p class="panel-explainer">
+            超过 5 分钟无活动即退出当前工作，历史不删除。
+          </p>
+          <div
+            id="sessionList"
+            class="session-list"
+            role="list"
+            aria-label="会话列表"
+          ></div>
+          <p id="sessionListEmpty" class="panel-empty">尚未捕获 Agent 会话</p>
+        </section>
+
+        <section
+          id="sessionDetail"
+          class="panel detail-panel"
+          aria-labelledby="detailTitle"
+        >
+          <div class="panel-heading detail-heading">
+            <div>
+              <span class="eyebrow">SELECTED TASK</span>
+              <h1 id="detailTitle">当前任务</h1>
+            </div>
+            <div
+              id="detailBadges"
+              class="badge-row"
+              aria-label="任务状态"
+            ></div>
+          </div>
+
+          <div id="emptyState" class="detail-empty">
+            <span class="empty-code">NO ACTIVE SESSION</span>
+            <h2>等待 Dao 捕获会话</h2>
+            <p>
+              发起一轮经由 Dao 的对话后，这里会显示任务、路线、验证与缓存状态。
+            </p>
+          </div>
+
+          <div id="detailContent" class="detail-content" hidden>
+            <div class="goal-block">
+              <span class="field-label">GOAL</span>
+              <h2 id="detailGoal">—</h2>
+              <div class="identity-row">
+                <span id="detailSurface">—</span>
+                <span id="detailWorkspace">—</span>
+                <span id="detailSessionId">—</span>
+              </div>
+            </div>
+
+            <div class="progress-block">
+              <div class="progress-copy">
+                <span id="detailPhase">UNKNOWN</span>
+                <strong id="detailProgressText">0 / 0</strong>
+              </div>
+              <progress id="detailProgress" value="0" max="1">0%</progress>
+              <p id="detailCurrentTodo">没有结构化待办</p>
+            </div>
+
+            <div class="route-block" aria-label="当前路由">
+              <div class="route-node">
+                <span>UID</span>
+                <strong id="detailUid">—</strong>
+              </div>
+              <span class="route-arrow" aria-hidden="true">→</span>
+              <div class="route-node is-provider">
+                <span>PROVIDER</span>
+                <strong id="detailProvider">—</strong>
+              </div>
+              <span class="route-arrow" aria-hidden="true">→</span>
+              <div class="route-node">
+                <span>UPSTREAM</span>
+                <strong id="detailModel">—</strong>
+              </div>
+            </div>
+
+            <div class="detail-facts">
+              <article>
+                <span class="field-label">验证</span>
+                <strong id="detailVerification">—</strong>
+                <small id="detailBlocking">无阻塞</small>
+              </article>
+              <article>
+                <span class="field-label">失败信号</span>
+                <strong id="detailFailures">—</strong>
+                <small id="detailToolState">工具状态未知</small>
+              </article>
+              <article>
+                <span class="field-label">会话缓存</span>
+                <strong id="detailCacheRate">—</strong>
+                <small id="detailCacheTokens">未产生样本</small>
+              </article>
+              <article>
+                <span class="field-label">新鲜度</span>
+                <strong id="detailFreshness">—</strong>
+                <small id="detailMode">AUTO</small>
+              </article>
+              <article>
+                <span class="field-label">推理 Token</span>
+                <strong id="detailReasoningTokens">—</strong>
+                <small>当前任务最近一轮</small>
+              </article>
+              <article>
+                <span class="field-label">首字延迟</span>
+                <strong id="detailTtft">—</strong>
+                <small>TTFT</small>
+              </article>
+              <article>
+                <span class="field-label">轮次耗时</span>
+                <strong id="detailDuration">—</strong>
+                <small>DURATION</small>
+              </article>
+              <article>
+                <span class="field-label">渠道 TTFT P50</span>
+                <strong id="detailProviderP50">—</strong>
+                <small>PROVIDER MEDIAN</small>
+              </article>
+              <article>
+                <span class="field-label">渠道 TTFT P95</span>
+                <strong id="detailProviderP95">—</strong>
+                <small>PROVIDER TAIL</small>
+              </article>
+              <article>
+                <span class="field-label">缓存命中 P95</span>
+                <strong id="detailCacheHitP95">—</strong>
+                <small>CACHE HIT</small>
+              </article>
+              <article>
+                <span class="field-label">缓存未命中 P95</span>
+                <strong id="detailCacheMissP95">—</strong>
+                <small>CACHE MISS</small>
+              </article>
+              <article>
+                <span class="field-label">上下文压缩</span>
+                <strong id="detailCompactions">—</strong>
+                <small>COMPACTIONS</small>
+              </article>
+              <article>
+                <span class="field-label">模型路径</span>
+                <strong id="detailModelPath">—</strong>
+                <small>CONTROL PLANE</small>
+              </article>
+              <article>
+                <span class="field-label">状态来源</span>
+                <strong id="detailLoopSource">—</strong>
+                <small>LOOP SOURCE</small>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel providers-panel" aria-labelledby="providersTitle">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">CHANNELS · 渠道缓存统计</span>
+              <h1 id="providersTitle">渠道健康</h1>
+            </div>
+            <span id="providerCount" class="count-chip">0</span>
+          </div>
+          <div
+            id="providerList"
+            class="provider-list"
+            role="list"
+            aria-label="渠道列表"
+          ></div>
+          <p id="providerListEmpty" class="panel-empty">尚无渠道运行数据</p>
+        </section>
+
+        <section class="panel tasks-panel" aria-labelledby="tasksTitle">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">TASK FACTS · 已登记长任务</span>
+              <h1 id="tasksTitle">长任务运行情况</h1>
+            </div>
+            <span id="taskCount" class="count-chip">0</span>
+          </div>
+          <p class="panel-explainer">
+            这里只观察 Dao 登记的长任务，不是聊天会话。
+          </p>
+          <div class="task-summary" aria-label="长任务状态汇总">
+            <span id="taskRunning">运行中 0</span>
+            <span id="taskAttention">需要处理 0</span>
+            <span id="taskEnded">已结束 0</span>
+          </div>
+          <div
+            id="taskList"
+            class="task-list"
+            role="list"
+            aria-label="长任务执行记录"
+          ></div>
+          <p id="taskListEmpty" class="panel-empty">
+            目前没有 Dao 登记的长任务。
+          </p>
+        </section>
+
+        <section class="panel requests-panel" aria-labelledby="requestsTitle">
+          <div class="panel-heading request-heading">
+            <div>
+              <span class="eyebrow">RECENT CACHE SAMPLES</span>
+              <h1 id="requestsTitle">最近请求</h1>
+            </div>
+            <div class="legend" aria-label="图例">
+              <span><i class="legend-read"></i>缓存读</span>
+              <span><i class="legend-write"></i>缓存写</span>
+              <span><i class="legend-miss"></i>未命中</span>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">时间</th>
+                  <th scope="col">来源</th>
+                  <th scope="col">渠道 / 模型</th>
+                  <th scope="col">策略</th>
+                  <th scope="col">缓存 / 会话亲和</th>
+                  <th scope="col">命中</th>
+                  <th scope="col">读取</th>
+                  <th scope="col">写入</th>
+                  <th scope="col">前缀连续性</th>
+                  <th scope="col">TTFT</th>
+                  <th scope="col">上游首字</th>
+                  <th scope="col">重试开销</th>
+                  <th scope="col">状态</th>
+                </tr>
+              </thead>
+              <tbody id="requestRows"></tbody>
+            </table>
+            <p id="requestListEmpty" class="table-empty">
+              等待首个缓存观测样本
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer-note">
+        <span
+          >LOOPBACK ONLY · SANITIZED PROJECTION · NO PROMPTS / KEYS / FULL
+          PATHS</span
+        >
+        <span id="componentWarnings">RUNTIME CLEAN</span>
+      </footer>
+    </div>
+    <noscript>
+      <div class="noscript">
+        Web HUD 需要 JavaScript 才能接收 Dao 实时状态。
+      </div>
+    </noscript>
+  </body>
+</html>

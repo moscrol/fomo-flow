@@ -1,0 +1,3 @@
+# Dao Desktop keeps Bun as a project-local build tool. The packaged app still
+# runs the proven Node/CommonJS Dao runtime inside Electron.
+saveTextLockfile = false

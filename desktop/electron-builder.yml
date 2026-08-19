@@ -1,0 +1,71 @@
+appId: com.fomoflow.desktop
+productName: FOMO FLOW
+asar: true
+directories:
+  buildResources: build
+  output: release
+files:
+  - dist/**
+  - '!dist/mac-arm64{,/**}'
+  - '!dist/*.dmg'
+  - electron-dist/**
+  - package.json
+  - THIRD_PARTY_NOTICES.md
+extraResources:
+  - from: ../core
+    to: dao-runtime/core
+    filter:
+      - '**/*'
+      - '!**/*.log'
+  - from: ../vendor
+    to: dao-runtime/vendor
+    filter:
+      - '**/*'
+      - '!**/*.log'
+      - '!外接api/core/配置.json'
+      - '!外接api/core/.dao-request-history.json'
+      - '!外接api/core/route-decision-inbox.json'
+      - '!外接api/core/_lsp_parsed_dump.json'
+      - '!外接api/core/_upstream_req_dump.json'
+      - '!**/*_backup.json'
+  - from: ../ui
+    to: dao-runtime/ui
+  - from: ../media
+    to: dao-runtime/media
+  - from: ../package.json
+    to: dao-runtime/package.json
+  - from: ..
+    to: dao-acp-host
+    filter:
+      - dao-acp-stdio-proxy.js
+      - acp-session-bridge.js
+      - acp-session-lineage.js
+      - acp-workspace-message.js
+      - core/dao_local_endpoint.js
+asarUnpack:
+  - resources/**
+win:
+  executableName: fomo-flow
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+  identity: null
+  notarize: false
+dmg:
+  artifactName: FOMO-FLOW-${version}-mac-${arch}.${ext}
+linux:
+  target:
+    - AppImage
+    - snap
+    - deb
+  maintainer: electronjs.org
+  category: Utility
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false

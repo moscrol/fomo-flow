@@ -1,0 +1,18 @@
+{
+  "profiles": [
+    {
+      "id": "example-bridge",
+      "name": "Example Chat to Responses",
+      "providerMode": "managed",
+      "providerName": "openai-compatible-example",
+      "sourceProtocol": "openai-chat",
+      "sourceModel": "YOUR_UPSTREAM_MODEL",
+      "outputModel": "YOUR_PUBLIC_MODEL_ALIAS",
+      "targetProtocols": [
+        "openai-responses"
+      ],
+      "maxOutputTokens": 16384,
+      "reasoningLevel": "off"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": 11435
+  },
+  "providers": {
+    "openai-compatible-example": {
+      "enabled": true,
+      "apiKey": "YOUR_PROVIDER_API_KEY",
+      "baseUrl": "https://provider.example/v1",
+      "protocol": "openai-chat",
+      "type": "openai-compatible",
+      "completionPath": "/chat/completions",
+      "streamMode": "stream",
+      "models": [
+        "YOUR_UPSTREAM_MODEL"
+      ],
+      "extraHeaders": {},
+      "pricing": {
+        "inPer1k": 0,
+        "outPer1k": 0,
+        "currency": "USD",
+        "budgetLimit": 0
+      }
+    },
+    "anthropic-example": {
+      "enabled": false,
+      "apiKey": "YOUR_ANTHROPIC_API_KEY",
+      "baseUrl": "https://provider.example",
+      "protocol": "anthropic",
+      "type": "anthropic",
+      "completionPath": "/v1/messages",
+      "streamMode": "stream",
+      "models": [
+        "YOUR_CLAUDE_MODEL"
+      ],
+      "extraHeaders": {}
+    }
+  },
+  "daoRoutes": {
+    "enabled": true,
+    "substituteEnabled": false,
+    "allowMcpTools": true,
+    "familyTierExtend": false,
+    "resilience": {
+      "circuit": {
+        "strikeThreshold": 3,
+        "strikeWindowMs": 60000,
+        "earlyProbeMs": 8000,
+        "probeLeadMs": 5000,
+        "probeIntervalMs": 5000,
+        "restoreAffinity": true
+      }
+    },
+    "routes": {
+      "YOUR_DEVIN_MODEL_UID": {
+        "provider": "openai-compatible-example",
+        "model": "YOUR_UPSTREAM_MODEL",
+        "protocol": "openai-chat",
+        "maxOutputTokens": 16384,
+        "reasoningLevel": "off",
+        "autoFallback": true,
+        "channelPriority": [
+          {
+            "provider": "openai-compatible-example",
+            "model": "YOUR_UPSTREAM_MODEL",
+            "protocol": "openai-chat"
+          }
+        ]
+      }
+    }
+  }
+}

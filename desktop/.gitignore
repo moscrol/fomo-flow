@@ -1,0 +1,9 @@
+node_modules
+dist
+release
+out
+electron-dist
+.bun
+.DS_Store
+.eslintcache
+*.log*

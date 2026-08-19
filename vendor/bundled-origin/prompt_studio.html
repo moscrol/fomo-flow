@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>道 Agent · 项目提示词注入</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09110f;
+      --panel: #101b18;
+      --panel-2: #14231f;
+      --line: #294238;
+      --text: #ecf5ef;
+      --muted: #91a99d;
+      --gold: #e4bd72;
+      --green: #6fd5a3;
+      --red: #ff8f8f;
+      --shadow: 0 22px 60px rgba(0, 0, 0, .32);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(61, 122, 94, .18), transparent 31rem),
+        radial-gradient(circle at 88% 0%, rgba(228, 189, 114, .09), transparent 25rem),
+        var(--bg);
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 28px; }
+    header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+      margin-bottom: 22px;
+    }
+    .eyebrow { color: var(--gold); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 7px 0 8px; font-size: clamp(25px, 3vw, 40px); font-weight: 650; letter-spacing: -.03em; }
+    .subtitle { color: var(--muted); line-height: 1.7; max-width: 760px; }
+    .active {
+      min-width: 260px; padding: 13px 16px; border: 1px solid var(--line);
+      border-radius: 14px; background: rgba(16, 27, 24, .84); box-shadow: var(--shadow);
+    }
+    .active small { display: block; color: var(--muted); margin-bottom: 5px; }
+    .active strong { color: var(--green); }
+    .layout { display: grid; grid-template-columns: 350px minmax(0, 1fr); gap: 18px; }
+    .card {
+      border: 1px solid var(--line); border-radius: 18px; background: rgba(16, 27, 24, .94);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .sidebar { display: flex; flex-direction: column; min-height: 690px; }
+    .toolbar { padding: 16px; border-bottom: 1px solid var(--line); }
+    .search-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    input, textarea, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 10px;
+      background: #0b1512; color: var(--text); outline: none;
+    }
+    input, select { height: 42px; padding: 0 12px; }
+    textarea { min-height: 390px; padding: 15px; resize: vertical; line-height: 1.62; tab-size: 2; }
+    input:focus, textarea:focus, select:focus { border-color: #568e76; box-shadow: 0 0 0 3px rgba(111, 213, 163, .09); }
+    .btn {
+      border: 1px solid var(--line); border-radius: 10px; min-height: 42px; padding: 0 14px;
+      color: var(--text); background: #182823; font-weight: 600;
+    }
+    .btn:hover { filter: brightness(1.12); }
+    .btn.primary { color: #07120e; background: var(--green); border-color: var(--green); }
+    .btn.gold { color: #1b1306; background: var(--gold); border-color: var(--gold); }
+    .btn.danger { color: #ffd7d7; background: transparent; border-color: #68403f; }
+    .projects { padding: 10px; overflow: auto; flex: 1; }
+    .group-title { color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: .08em; padding: 12px 9px 7px; }
+    .project {
+      width: 100%; text-align: left; border: 1px solid transparent; color: var(--text);
+      background: transparent; border-radius: 12px; padding: 11px; margin-bottom: 5px;
+    }
+    .project:hover { background: var(--panel-2); }
+    .project.selected { border-color: #477862; background: #172a23; }
+    .project.active-project::after { content: "已注入"; float: right; color: var(--green); font-size: 11px; }
+    .project-name { font-weight: 650; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .project-path { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .empty { color: var(--muted); text-align: center; padding: 70px 18px; line-height: 1.8; }
+    .editor { padding: 21px; }
+    .editor-grid { display: grid; grid-template-columns: 1fr 180px; gap: 13px; margin-bottom: 13px; }
+    label { display: block; color: var(--muted); font-size: 12px; margin: 0 0 7px 2px; }
+    .field { margin-bottom: 13px; }
+    .path-line { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .check { display: flex; align-items: center; gap: 9px; color: var(--text); font-size: 13px; }
+    .check input { width: 17px; height: 17px; accent-color: var(--green); }
+    .strict-note {
+      padding: 11px 13px; border: 1px solid rgba(111, 213, 163, .28); border-radius: 10px;
+      color: var(--green); background: rgba(111, 213, 163, .06); font-size: 13px; line-height: 1.6;
+    }
+    .meta-line { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; margin-top: 7px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 9px; padding-top: 15px; border-top: 1px solid var(--line); margin-top: 17px; }
+    .actions .spacer { flex: 1; }
+    #status {
+      position: fixed; right: 24px; bottom: 24px; max-width: min(440px, calc(100vw - 48px));
+      padding: 13px 16px; border: 1px solid var(--line); border-radius: 12px;
+      background: #15261f; box-shadow: var(--shadow); transform: translateY(120px);
+      opacity: 0; transition: .22s ease; pointer-events: none;
+    }
+    #status.show { transform: none; opacity: 1; }
+    #status.error { border-color: #8f4f4c; color: #ffd3d3; background: #2a1716; }
+    @media (max-width: 850px) {
+      .shell { padding: 18px; }
+      header { display: block; }
+      .active { margin-top: 15px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { min-height: 320px; max-height: 480px; }
+      .editor-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <div class="eyebrow">DAO AGENT · PROMPT STUDIO</div>
+        <h1>项目提示词注入</h1>
+        <div class="subtitle">按项目和分类保存提示词。选择项目后点击“注入 Devin”，下一条 Cascade 对话的系统提示词将被该项目提示词完整替换。</div>
+      </div>
+      <div class="active">
+        <small>当前注入</small>
+        <strong id="activeName">尚未加载</strong>
+        <small id="activeMode" style="margin-top:7px">正在连接本机插件…</small>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="card sidebar">
+        <div class="toolbar">
+          <div class="search-row">
+            <input id="search" placeholder="搜索项目、分类或路径">
+            <button class="btn" id="newBtn">＋ 新建</button>
+          </div>
+        </div>
+        <div class="projects" id="projects"></div>
+      </aside>
+
+      <section class="card editor">
+        <div class="editor-grid">
+          <div>
+            <label for="name">项目名称</label>
+            <input id="name" maxlength="160" placeholder="例如：商城后端">
+          </div>
+          <div>
+            <label for="category">分类</label>
+            <input id="category" maxlength="80" list="categoryList" placeholder="例如：工作">
+            <datalist id="categoryList"></datalist>
+          </div>
+        </div>
+        <div class="field path-line">
+          <div>
+            <label for="projectPath">项目路径（用于识别和备注）</label>
+            <input id="projectPath" maxlength="2000" placeholder="E:\projects\my-app">
+          </div>
+        </div>
+        <div class="field">
+          <label for="prompt">项目提示词</label>
+          <textarea id="prompt" maxlength="200000" placeholder="写入该项目的技术栈、目录约定、编码规范、测试命令和注意事项…"></textarea>
+          <div class="meta-line"><span>建议只放长期稳定的项目规则，有利于缓存复用</span><span id="charCount">0 字</span></div>
+        </div>
+        <div class="strict-note">严格替换模式：只注入当前项目提示词，不再拼接默认提示词、官方系统提示词或保留块。</div>
+        <div class="actions">
+          <button class="btn" id="saveBtn">保存项目</button>
+          <button class="btn gold" id="saveInjectBtn">保存并注入</button>
+          <button class="btn primary" id="injectBtn">注入 Devin</button>
+          <span class="spacer"></span>
+          <button class="btn danger" id="deleteBtn">删除项目</button>
+          <button class="btn" id="resetBtn">恢复默认提示词</button>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div id="status"></div>
+
+  <script>
+    (() => {
+      const state = { projects: [], selectedId: "", activeProjectId: "", mode: "" };
+      const $ = (id) => document.getElementById(id);
+      const fields = {
+        name: $("name"), category: $("category"), projectPath: $("projectPath"),
+        prompt: $("prompt")
+      };
+
+      async function api(path, options) {
+        const response = await fetch(path, {
+          headers: { "Content-Type": "application/json" },
+          ...options
+        });
+        const text = await response.text();
+        let data;
+        try { data = text ? JSON.parse(text) : {}; } catch { data = { error: text }; }
+        if (!response.ok || data.ok === false) throw new Error(data.error || ("HTTP " + response.status));
+        return data;
+      }
+
+      function toast(message, error) {
+        const box = $("status");
+        box.textContent = message;
+        box.className = error ? "show error" : "show";
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => box.className = "", 3200);
+      }
+
+      function selected() {
+        return state.projects.find((item) => item.id === state.selectedId) || null;
+      }
+
+      function updateActive() {
+        const active = state.projects.find((item) => item.id === state.activeProjectId);
+        $("activeName").textContent = active ? active.name : "默认提示词";
+        $("activeMode").textContent = state.mode === "invert"
+          ? "独占替换模式 · 下一条 Cascade 对话生效"
+          : "当前为官方透传模式";
+      }
+
+      function fill(project) {
+        fields.name.value = project?.name || "";
+        fields.category.value = project?.category || "";
+        fields.projectPath.value = project?.projectPath || "";
+        fields.prompt.value = project?.prompt || "";
+        updateCount();
+      }
+
+      function render() {
+        const query = $("search").value.trim().toLowerCase();
+        const visible = state.projects.filter((item) =>
+          !query || [item.name, item.category, item.projectPath].join("\n").toLowerCase().includes(query)
+        );
+        const groups = new Map();
+        visible.forEach((item) => {
+          const category = item.category || "未分类";
+          if (!groups.has(category)) groups.set(category, []);
+          groups.get(category).push(item);
+        });
+        const root = $("projects");
+        root.textContent = "";
+        [...groups.keys()].sort((a, b) => a.localeCompare(b, "zh-CN")).forEach((category) => {
+          const title = document.createElement("div");
+          title.className = "group-title";
+          title.textContent = category;
+          root.appendChild(title);
+          groups.get(category)
+            .sort((a, b) => b.updatedAt - a.updatedAt)
+            .forEach((item) => {
+              const button = document.createElement("button");
+              button.className = "project" +
+                (item.id === state.selectedId ? " selected" : "") +
+                (item.id === state.activeProjectId ? " active-project" : "");
+              const name = document.createElement("div");
+              name.className = "project-name";
+              name.textContent = item.name;
+              const path = document.createElement("div");
+              path.className = "project-path";
+              path.textContent = item.projectPath || (item.prompt.length + " 字");
+              button.append(name, path);
+              button.addEventListener("click", () => {
+                state.selectedId = item.id;
+                fill(item);
+                render();
+              });
+              root.appendChild(button);
+            });
+        });
+        if (!visible.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = state.projects.length ? "没有匹配的项目" : "还没有项目\n点击“新建”开始保存";
+          empty.style.whiteSpace = "pre-line";
+          root.appendChild(empty);
+        }
+        const categories = [...new Set(state.projects.map((item) => item.category).filter(Boolean))];
+        $("categoryList").innerHTML = categories.map((item) => "<option value=\"" +
+          item.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;") + "\">").join("");
+        updateActive();
+      }
+
+      function formData(inject) {
+        return {
+          id: state.selectedId || undefined,
+          name: fields.name.value.trim(),
+          category: fields.category.value.trim() || "未分类",
+          projectPath: fields.projectPath.value.trim(),
+          prompt: fields.prompt.value,
+          keepBlocks: false,
+          inject
+        };
+      }
+
+      async function load() {
+        const data = await api("/origin/project-prompts");
+        state.projects = data.projects || [];
+        state.selectedId = data.selectedId || state.projects[0]?.id || "";
+        state.activeProjectId = data.activeProjectId || "";
+        state.mode = data.mode || "";
+        fill(selected());
+        render();
+      }
+
+      async function save(inject) {
+        const data = await api("/origin/project-prompts", {
+          method: "POST", body: JSON.stringify(formData(inject))
+        });
+        state.projects = data.store.projects;
+        state.selectedId = data.project.id;
+        if (inject) {
+          state.activeProjectId = data.project.id;
+          state.mode = data.injection.mode;
+        }
+        fill(data.project);
+        render();
+        toast(inject ? "已保存并独占注入 Devin · 下一条对话生效" : "项目提示词已保存");
+      }
+
+      async function inject() {
+        const project = selected();
+        if (!project) return toast("请先选择或保存一个项目", true);
+        const data = await api("/origin/project-prompts/" + encodeURIComponent(project.id) + "/inject", {
+          method: "POST", body: "{}"
+        });
+        state.activeProjectId = project.id;
+        state.mode = data.injection.mode;
+        render();
+        toast("已独占注入 “" + project.name + "” · 下一条 Cascade 对话生效");
+      }
+
+      async function remove() {
+        const project = selected();
+        if (!project) return;
+        if (!window.confirm("删除项目 “" + project.name + "”？")) return;
+        const data = await api("/origin/project-prompts/" + encodeURIComponent(project.id), { method: "DELETE" });
+        if (data.clearedActive) state.activeProjectId = "";
+        state.projects = state.projects.filter((item) => item.id !== project.id);
+        state.selectedId = state.projects[0]?.id || "";
+        fill(selected());
+        render();
+        toast("项目已删除");
+      }
+
+      async function reset() {
+        await api("/origin/project-prompts/reset", { method: "POST", body: "{}" });
+        state.activeProjectId = "";
+        render();
+        toast("已恢复默认提示词 · 下一条对话生效");
+      }
+
+      function updateCount() { $("charCount").textContent = fields.prompt.value.length + " 字"; }
+      $("search").addEventListener("input", render);
+      fields.prompt.addEventListener("input", updateCount);
+      $("newBtn").addEventListener("click", () => { state.selectedId = ""; fill(null); render(); fields.name.focus(); });
+      $("saveBtn").addEventListener("click", () => save(false).catch((e) => toast(e.message, true)));
+      $("saveInjectBtn").addEventListener("click", () => save(true).catch((e) => toast(e.message, true)));
+      $("injectBtn").addEventListener("click", () => inject().catch((e) => toast(e.message, true)));
+      $("deleteBtn").addEventListener("click", () => remove().catch((e) => toast(e.message, true)));
+      $("resetBtn").addEventListener("click", () => reset().catch((e) => toast(e.message, true)));
+      load().catch((e) => toast("连接插件失败：" + e.message, true));
+    })();
+  </script>
+</body>
+</html>

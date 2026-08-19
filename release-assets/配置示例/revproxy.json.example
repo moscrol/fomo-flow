@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "apiKey": "YOUR_LOCAL_GATEWAY_KEY",
+  "applyInvert": false,
+  "exposeLan": false,
+  "defaultMaxTokens": 4096,
+  "isolatePrompt": true,
+  "disabledModels": [],
+  "tiers": {},
+  "dualPath": true
+}

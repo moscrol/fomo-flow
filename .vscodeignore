@@ -1,0 +1,38 @@
+*.vsix
+.gitignore
+vendor/bundled-origin/_full_model_catalog_v1_backup.json
+vendor/bundled-origin/_full_model_catalog_v2.json
+**/*.bak*
+# desktop/ 是独立的 Electron 桌面端，不属于 VS Code 插件包。
+# 打过 Electron 包后 desktop/release/ 会出现 .app 整包（含 framework 符号链接
+# 目录），vsce 会把它们列进文件清单，secretlint 拿目录当文件读 → EISDIR。
+# 对照已发布的 dao-flow-9.9.423.vsix：顶层本来就没有 desktop/。
+desktop/**
+desktop
+vendor/外接api/core/tool-output-cache/**
+vendor/外接api/core/tool-output-cache
+vendor/外接api/core/_lsp_parsed_dump.json
+vendor/外接api/core/_upstream_req_dump.json
+vendor/外接api/core/配置.json
+vendor/bundled-origin/_router_diag.log
+vendor/bundled-origin/_ea_diag.log
+vendor/bundled-origin/_custom_sp.json
+vendor/bundled-origin/_lastinject.json
+vendor/bundled-origin/_lastupstream.json
+vendor/bundled-origin/_injectsbykind.json
+vendor/bundled-origin/_model_unlock_enabled
+vendor/bundled-origin/_origin_canon.txt
+vendor/bundled-origin/_origin_mode.txt
+# ── 与 scripts/build-commercial-bundle.js 的严格清单对齐 ──
+# 直接 `npm run package`（vsce + 本文件）不应比商业构建多打进测试、内部文档、
+# 诊断日志/转储与派生源，否则两条打包路径产物不一致。
+.git*
+.github/**
+test/**
+docs/**
+release-assets/**
+dist/**
+**/*.log
+**/*_dump.json
+**/*_diag.log
+vendor/bundled-origin/源.js
