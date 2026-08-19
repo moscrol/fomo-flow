@@ -126,6 +126,64 @@ upstream 5xx / network error          hard fail (401 / balance / 404)
 
 ---
 
+## 快速上手
+
+### 安装（VSIX）
+
+```bash
+code --install-extension fomo-flow-9.9.425.vsix
+# 或 VS Code 扩展面板 → ··· → Install from VSIX…
+```
+
+安装后重载宿主。配置路径：`~/.fomo-flow/配置.json`（密钥只存本地，永不入仓）。
+
+### 最小配置示例
+
+```json
+{
+  "providers": {
+    "glm": {
+      "baseUrl": "https://open.bigmodel.cn/api/coding/paas",
+      "enabled": true,
+      "apiKey": "…",
+      "models": ["glm-5.2"]
+    }
+  },
+  "daoRoutes": {
+    "models": {
+      "claude-opus-5-high": {
+        "provider": "opus", "model": "claude-opus-5",
+        "autoFallback": true,
+        "alternatives": [{"provider": "kfcoding", "model": "claude-opus-5"}]
+      }
+    },
+    "resilience": {
+      "circuit": {
+        "strikeThreshold": 3, "strikeWindowMs": 60000,
+        "earlyProbeMs": 8000, "probeIntervalMs": 5000, "restoreAffinity": true
+      }
+    }
+  }
+}
+```
+
+### 跑测试
+
+```bash
+npm test                # 全量：358 core 断言 + 全部 feature
+npm run test:quick      # 核心快检
+npm run test:revproxy   # 反代自检
+npm run test:exact-cache / test:semantic-cache / test:outbound-redact / test:otel / test:acp-proxy
+```
+
+### 看它活着（实测日志样例）
+
+```text
+[熔断降敏] terra/gpt-5.6-terra network strike=2/3 · 暂不熔断
+[自愈] terra/gpt-5.6-terra 探活成功 · 熔断提前解除 · 恢复会话=0
+_cacheUsage provider=glm model=glm-5.2 input=69254 cached=65024 hitRate=93.9%
+```
+
 ## 定位边界（诚实声明）
 
 **刻意不做**：
